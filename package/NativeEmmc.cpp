@@ -104,14 +104,14 @@ nemmc_transport_lock_release(void)
 volatile uint32_t nemmc_reads;
 volatile uint32_t nemmc_heartbeats;
 
+/* sirius_emmc.c publishes the load_init_program / execve stage here. The init
+ * thread disappears inside a copyout that never returns, so the only channel
+ * that still works is this thread's log line. */
+extern "C" volatile uint32_t sirius_emmc_step;
+
 static void
 nemmc_heartbeat_thread(void *, wait_result_t)
 {
-	/* sirius_emmc.c publishes the load_init_program / execve stage here. The init
-	 * thread disappears inside a copyout that never returns, so the only channel
-	 * that still works is this thread's log line. */
-	extern "C" volatile uint32_t sirius_emmc_step;
-
 	for (;;) {
 		emmc_log_hex("NEMMC alive beats/reads ",
 		    (((uint64_t)nemmc_heartbeats) << 32) | nemmc_reads);
