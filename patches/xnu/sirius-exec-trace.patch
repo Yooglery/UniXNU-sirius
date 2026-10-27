@@ -2,22 +2,18 @@ diff --git a/bsd/kern/kern_exec.c b/bsd/kern/kern_exec.c
 index 4308896..bf47271 100644
 --- a/bsd/kern/kern_exec.c
 +++ b/bsd/kern/kern_exec.c
-@@ -8072,7 +8072,14 @@ load_init_program_at_path(proc_t p, user_addr_t scratch_addr, const char* path,
+@@ -8072,7 +8072,10 @@ load_init_program_at_path(proc_t p, user_addr_t scratch_addr, const char* path,
  	 */
  	size_t path_length = strlen(path) + 1;
  	argv0 = scratch_addr;
-+	printf("sirius: init ctx p=%p curproc=%p map=%p pmap=%p vmspace=%p vmmap=%p for %s\n",
-+	    (void *)p, (void *)current_proc(), (void *)current_thread()->map,
-+	    (void *)(current_thread()->map ? current_thread()->map->pmap : 0),
-+	    (void *)p->p_vmspace,
-+	    (void *)(p->p_vmspace ? p->p_vmspace->vm_map : 0), path);
++	printf("sirius: init ctx p=%p curproc=%p for %s\n", (void *)p, (void *)current_proc(), path);
 +	printf("sirius: init path copyout enter %s\n", path);
  	error = copyout(path, argv0, path_length);
 +	printf("sirius: init path copyout %d\n", error);
  	if (error) {
  		return error;
  	}
-@@ -8096,6 +8103,7 @@ load_init_program_at_path(proc_t p, user_addr_t scratch_addr, const char* path,
+@@ -8096,6 +8099,7 @@ load_init_program_at_path(proc_t p, user_addr_t scratch_addr, const char* path,
  		scratch_addr = USER_ADDR_ALIGN(scratch_addr + init_args_length, sizeof(user_addr_t));
  	}
  
@@ -25,7 +21,7 @@ index 4308896..bf47271 100644
  	if (proc_is64bit(p)) {
  		user64_addr_t argv64bit[3] = {};
  
-@@ -8133,9 +8141,13 @@ load_init_program_at_path(proc_t p, user_addr_t scratch_addr, const char* path,
+@@ -8133,9 +8137,13 @@ load_init_program_at_path(proc_t p, user_addr_t scratch_addr, const char* path,
  	 * The access to the cred is safe:
  	 * the proc isn't running yet, it's stable.
  	 */
