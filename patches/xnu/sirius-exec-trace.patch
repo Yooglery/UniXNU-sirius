@@ -2,27 +2,14 @@ diff --git a/bsd/kern/kern_exec.c b/bsd/kern/kern_exec.c
 index 4308896..bf47271 100644
 --- a/bsd/kern/kern_exec.c
 +++ b/bsd/kern/kern_exec.c
-@@ -7147,8 +7147,13 @@ load_init_program(proc_t p)
- 	vm_map_t map = current_map();
- 	mach_vm_offset_t scratch_addr = 0;
- 	mach_vm_size_t map_page_size = vm_map_page_size(map);
- 
--	(void) mach_vm_allocate_kernel(map, &scratch_addr, map_page_size, VM_FLAGS_ANYWHERE, VM_KERN_MEMORY_NONE);
-+	{
-+		kern_return_t kr = mach_vm_allocate_kernel(map, &scratch_addr, map_page_size,
-+		    VM_FLAGS_ANYWHERE, VM_KERN_MEMORY_NONE);
-+		printf("sirius: init map=%p page=%llu kr=%d scratch=%#llx\n", (void *)map,
-+		    (unsigned long long)map_page_size, kr, (unsigned long long)scratch_addr);
-+	}
- #if CONFIG_MEMORYSTATUS
- 	(void) memorystatus_init_at_boot_snapshot();
- #endif /* CONFIG_MEMORYSTATUS */
-@@ -8072,7 +8077,13 @@ load_init_program_at_path(proc_t p, user_addr_t scratch_addr, const char* path,
+@@ -8072,7 +8072,15 @@ load_init_program_at_path(proc_t p, user_addr_t scratch_addr, const char* path,
  	 */
  	size_t path_length = strlen(path) + 1;
  	argv0 = scratch_addr;
 +	extern volatile uint32_t sirius_emmc_step;
-+	printf("sirius: init ctx p=%p curproc=%p for %s\n", (void *)p, (void *)current_proc(), path);
++	printf("sirius: init ctx p=%p curproc=%p map=%p scratch=%#llx page=%llu for %s\n",
++	    (void *)p, (void *)current_proc(), (void *)current_map(), (unsigned long long)scratch_addr,
++	    (unsigned long long)vm_map_page_size(current_map()), path);
 +	sirius_emmc_step = 31;
 +	printf("sirius: init path copyout enter %s\n", path);
  	error = copyout(path, argv0, path_length);
@@ -31,7 +18,7 @@ index 4308896..bf47271 100644
  	if (error) {
  		return error;
  	}
-@@ -8096,6 +8107,8 @@ load_init_program_at_path(proc_t p, user_addr_t scratch_addr, const char* path,
+@@ -8096,6 +8103,8 @@ load_init_program_at_path(proc_t p, user_addr_t scratch_addr, const char* path,
  		scratch_addr = USER_ADDR_ALIGN(scratch_addr + init_args_length, sizeof(user_addr_t));
  	}
  
@@ -40,7 +27,7 @@ index 4308896..bf47271 100644
  	if (proc_is64bit(p)) {
  		user64_addr_t argv64bit[3] = {};
  
-@@ -8133,9 +8146,16 @@ load_init_program_at_path(proc_t p, user_addr_t scratch_addr, const char* path,
+@@ -8133,9 +8142,16 @@ load_init_program_at_path(proc_t p, user_addr_t scratch_addr, const char* path,
  	 * The access to the cred is safe:
  	 * the proc isn't running yet, it's stable.
  	 */
