@@ -2,14 +2,15 @@ diff --git a/bsd/kern/kern_exec.c b/bsd/kern/kern_exec.c
 index 4308896..bf47271 100644
 --- a/bsd/kern/kern_exec.c
 +++ b/bsd/kern/kern_exec.c
-@@ -8072,7 +8072,15 @@ load_init_program_at_path(proc_t p, user_addr_t scratch_addr, const char* path,
+@@ -8072,7 +8072,16 @@ load_init_program_at_path(proc_t p, user_addr_t scratch_addr, const char* path,
  	 */
  	size_t path_length = strlen(path) + 1;
  	argv0 = scratch_addr;
 +	extern volatile uint32_t sirius_emmc_step;
-+	printf("sirius: init ctx p=%p curproc=%p map=%p scratch=%#llx page=%llu for %s\n",
-+	    (void *)p, (void *)current_proc(), (void *)current_map(), (unsigned long long)scratch_addr,
-+	    (unsigned long long)vm_map_page_size(current_map()), path);
++	printf("sirius: init ctx p=%p curproc=%p map=%p is_kmap=%d ctask=%p ptask=%p scratch=%#llx page=%llu for %s\n",
++	    (void *)p, (void *)current_proc(), (void *)current_map(), current_map() == kernel_map,
++	    (void *)current_task(), (void *)proc_task(p),
++	    (unsigned long long)scratch_addr, (unsigned long long)vm_map_page_size(current_map()), path);
 +	sirius_emmc_step = 31;
 +	printf("sirius: init path copyout enter %s\n", path);
  	error = copyout(path, argv0, path_length);
