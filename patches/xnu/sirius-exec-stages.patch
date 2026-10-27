@@ -9,14 +9,14 @@ diff --git a/bsd/kern/kern_exec.c b/bsd/kern/kern_exec.c
  	__execve_data = kalloc_type(typeof(*__execve_data), Z_WAITOK | Z_ZERO);
  	if (__execve_data == NULL) {
  		error = ENOMEM;
-@@ -5241,4 +5242,5 @@ __mac_execve(proc_t p, struct __mac_execve_args *uap, int32_t *retval __unused)
+@@ -5241,5 +5242,6 @@ __mac_execve(proc_t p, struct __mac_execve_args *uap, int32_t *retval __unused)
  
  		new_task = get_threadtask(imgp->ip_new_thread);
 +		printf("sirius: execve cloneproc done task=%p\n", (void *)new_task);
  	}
  
  	p = (proc_t)get_bsdthreadtask_info(imgp->ip_new_thread);
-@@ -5260,4 +5262,6 @@ __mac_execve(proc_t p, struct __mac_execve_args *uap, int32_t *retval __unused)
+@@ -5260,5 +5262,7 @@ __mac_execve(proc_t p, struct __mac_execve_args *uap, int32_t *retval __unused)
  	 * as 0 and pretends the call succeeded.
  	 */
 +	printf("sirius: execve activate enter\n");
@@ -24,10 +24,11 @@ diff --git a/bsd/kern/kern_exec.c b/bsd/kern/kern_exec.c
 +	printf("sirius: execve activate ret=%d\n", error);
  	/* thread and task ref returned for vfexec case */
  
-@@ -5278,5 +5282,6 @@ __mac_execve(proc_t p, struct __mac_execve_args *uap, int32_t *retval __unused)
+@@ -5278,6 +5282,7 @@ __mac_execve(proc_t p, struct __mac_execve_args *uap, int32_t *retval __unused)
  		/* proc ref returned */
  		should_release_proc_ref = TRUE;
 +		printf("sirius: execve switched task\n");
  	}
  
  	kauth_cred_unref(&context.vc_ucred);
+ 
