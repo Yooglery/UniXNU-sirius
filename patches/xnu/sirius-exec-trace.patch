@@ -43,3 +43,18 @@ index 4308896..bf47271 100644
  }
  
  static const char * init_programs[] = {
+@@ -7147,7 +7160,12 @@ load_init_program(proc_t p)
+ 	vm_map_t map = current_map();
+ 	mach_vm_offset_t scratch_addr = 0;
+ 	mach_vm_size_t map_page_size = vm_map_page_size(map);
+ 
+-	(void) mach_vm_allocate_kernel(map, &scratch_addr, map_page_size, VM_FLAGS_ANYWHERE, VM_KERN_MEMORY_NONE);
++	{
++		kern_return_t kr = mach_vm_allocate_kernel(map, &scratch_addr, map_page_size,
++		    VM_FLAGS_ANYWHERE, VM_KERN_MEMORY_NONE);
++		printf("sirius: init map=%p page=%llu kr=%d scratch=%#llx\n", (void *)map,
++		    (unsigned long long)map_page_size, kr, (unsigned long long)scratch_addr);
++	}
+ #if CONFIG_MEMORYSTATUS
+ 	(void) memorystatus_init_at_boot_snapshot();
+ #endif /* CONFIG_MEMORYSTATUS */
